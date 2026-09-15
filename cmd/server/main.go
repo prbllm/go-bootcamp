@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"entrytest/internal/config"
+	"entrytest/internal/handlers"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -44,6 +45,10 @@ func main() {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
+
+	router.Get(config.HealthPath, handlers.HealthHandler)
+
+	router.Post(config.EchoPath, handlers.EchoHandler)
 
 	// Панель из frontend/. Каталог берётся относительно рабочего, поэтому
 	// запускайте из корня модуля: go run ./cmd/server

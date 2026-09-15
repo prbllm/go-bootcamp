@@ -6,23 +6,36 @@
 package main
 
 import (
+	"context"
+	"entrytest/internal/config"
+	"errors"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
-	port := os.Getenv("PORT")
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	defer stop()
+
+	port := os.Getenv(config.PORT_ENV)
 	if port == "" {
-		port = "8080"
+		port = config.PORT_DEFAULT
 	}
 
 	portNum, err := strconv.Atoi(port)
 	if err != nil {
 		log.Fatalf("некорректный PORT: %v", err)
+		os.Exit(1)
 	}
+
+	g, shutdownCtx := errgroup.WithContext(ctx)
 
 	mux := http.NewServeMux()
 
@@ -46,6 +59,25 @@ func main() {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	log.Printf("сервер слушает http://localhost:%d", portNum)
-	log.Fatal(srv.ListenAndServe())
+	g.Go(func() error {
+		log.Printf("сервер слушает http://localhost:%d", portNum)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			return err
+		}
+		return nil
+	})
+
+	g.Go(func() error {
+		<-shutdownCtx.Done()
+
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		log.Println("shutting down...")
+		return srv.Shutdown(shutdownCtx)
+	})
+
+	if err := g.Wait(); err != nil {
+		log.Fatalf("server stopped with error: %v", err)
+	}
+	log.Println("shutdown complete")
 }

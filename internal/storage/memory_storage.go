@@ -47,6 +47,10 @@ func (s *MemoryStorage) Delete(id uint64) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	if _, ok := s.messages[id]; !ok {
+		return ErrNotFound
+	}
+
 	delete(s.messages, id)
 
 	return nil

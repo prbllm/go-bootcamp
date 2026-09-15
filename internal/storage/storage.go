@@ -1,6 +1,11 @@
 package storage
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var ErrNotFound = errors.New("not found")
 
 type Storage interface {
 	Save(message *Message) (*Message, error)

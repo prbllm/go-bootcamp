@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"testing"
 	"time"
 )
@@ -123,7 +124,8 @@ func TestMemoryStorage_DeleteMissingID(t *testing.T) {
 
 	s := New()
 
-	if err := s.Delete(999); err != nil {
-		t.Fatalf("Delete missing id: %v", err)
+	err := s.Delete(999)
+	if !errors.Is(err, ErrNotFound) {
+		t.Fatalf("Delete missing id: %v, want ErrNotFound", err)
 	}
 }

@@ -54,12 +54,11 @@ func main() {
 	router.Post(config.EchoPath, h.EchoHandler)
 	router.Get(config.MessagesPath, h.MessagesListHandler)
 	router.Post(config.MessagesPath, h.MessagesHandler)
+	router.Delete(config.MessagesPath+"/{id}", h.MessagesDeleteHandler)
 
 	// Панель из frontend/. Каталог берётся относительно рабочего, поэтому
 	// запускайте из корня модуля: go run ./cmd/server
 	router.Handle("/", http.FileServer(http.Dir("frontend")))
-
-	// TODO Этап 6: DELETE /messages/{id} -> 204, либо 404 если такого нет
 
 	srv := &http.Server{
 		Addr:              ":" + strconv.Itoa(portNum),

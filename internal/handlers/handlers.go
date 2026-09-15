@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"cmp"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
+	"slices"
 
 	"entrytest/internal/config"
 	"entrytest/internal/storage"
@@ -97,6 +99,25 @@ func (h *Handlers) MessagesHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	if err = json.NewEncoder(w).Encode(message); err != nil {
+		log.Printf("encode response: %v", err)
+	}
+}
+
+func (h *Handlers) MessagesListHandler(w http.ResponseWriter, _ *http.Request) {
+	messages, err := h.store.GetAll()
+	if err != nil {
+		writeResponse(w, http.StatusInternalServerError, []byte(err.Error()))
+
+		return
+	}
+
+	slices.SortFunc(messages, func(a, b *storage.Message) int {
+		return cmp.Compare(b.ID, a.ID)
+	})
+
+	w.Header().Set(config.ContentTypeHeader, config.ContentTypeJSON)
+
+	if err = json.NewEncoder(w).Encode(messages); err != nil {
 		log.Printf("encode response: %v", err)
 	}
 }

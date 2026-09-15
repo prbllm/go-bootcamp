@@ -18,6 +18,7 @@ import (
 
 	"entrytest/internal/config"
 	"entrytest/internal/handlers"
+	"entrytest/internal/storage"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -42,22 +43,21 @@ func main() {
 
 	g, shutdownCtx := errgroup.WithContext(ctx)
 
+	store := storage.New()
+	h := handlers.New(store)
+
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 
-	router.Get(config.HealthPath, handlers.HealthHandler)
-
-	router.Post(config.EchoPath, handlers.EchoHandler)
+	router.Get(config.HealthPath, h.HealthHandler)
+	router.Post(config.EchoPath, h.EchoHandler)
+	router.Post(config.MessagesPath, h.MessagesHandler)
 
 	// Панель из frontend/. Каталог берётся относительно рабочего, поэтому
 	// запускайте из корня модуля: go run ./cmd/server
 	router.Handle("/", http.FileServer(http.Dir("frontend")))
 
-	// TODO Этап 1: GET /health           -> 200, тело "ok"
-	// TODO Этап 2: POST /echo            -> тело запроса без изменений
-	// TODO Этап 3: POST /echo            -> на application/json разобрать {"message": "..."} и вернуть JSON
-	// TODO Этап 4: POST /messages        -> сохранить в памяти, 201
 	// TODO Этап 5: GET /messages         -> все сообщения, новые сверху
 	// TODO Этап 6: DELETE /messages/{id} -> 204, либо 404 если такого нет
 

@@ -1,0 +1,179 @@
+# golangci-lint v2 — https://golangci-lint.run/
+# Запуск: golangci-lint run ./...
+
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: standard
+  enable:
+    # --- bugs / correctness ---
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - contextcheck
+    - durationcheck
+    - errcheck
+    - errchkjson
+    - errorlint
+    - exhaustive
+    - forcetypeassert
+    - gocheckcompilerdirectives
+    - gosec
+    - govet
+    - makezero
+    - nilerr
+    - nilnesserr
+    - noctx
+    - reassign
+    - recvcheck
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - wastedassign
+
+    # --- unused / dead code ---
+    - ineffassign
+    - unparam
+    - unused
+
+    # --- style / idioms ---
+    - copyloopvar
+    - dogsled
+    - dupl
+    - dupword
+    - errname
+    - exptostd
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - godot
+    - gomoddirectives
+    - goprintffuncname
+    - interfacebloat
+    - intrange
+    - misspell
+    - modernize
+    - nakedret
+    - nilnil
+    - nolintlint
+    - nosprintfhostport
+    - predeclared
+    - revive
+    - tagliatelle
+    - unconvert
+    - usestdlibvars
+    - whitespace
+    - wsl_v5
+
+    # --- complexity ---
+    - cyclop
+    - gocyclo
+    - nestif
+
+    # --- performance ---
+    - fatcontext
+    - mirror
+    - perfsprint
+    - prealloc
+
+    # --- tests ---
+    - thelper
+    - tparallel
+    - usetesting
+
+  settings:
+    cyclop:
+      max-complexity: 15
+    dupl:
+      threshold: 100
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+    exhaustive:
+      default-signifies-exhaustive: true
+    goconst:
+      min-len: 3
+      min-occurrences: 3
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    gocyclo:
+      min-complexity: 15
+    gosec:
+      excludes:
+        - G104 # unchecked errors — covered by errcheck
+    govet:
+      enable-all: true
+    misspell:
+      locale: US
+    nestif:
+      min-complexity: 5
+    revive:
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: dot-imports
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+        - name: exported
+        - name: if-return
+        - name: increment-decrement
+        - name: var-naming
+        - name: var-declaration
+        - name: package-comments
+        - name: range
+        - name: receiver-naming
+        - name: time-naming
+        - name: unexported-return
+        - name: indent-error-flow
+        - name: errorf
+        - name: empty-block
+        - name: superfluous-else
+        - name: unused-parameter
+        - name: unreachable-code
+        - name: redefines-builtin-id
+    staticcheck:
+      checks:
+        - all
+    tagliatelle:
+      case:
+        rules:
+          json: snake
+          yaml: snake
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+      - frontend$
+      - ^tests/ # стенд задания — не трогаем по README
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - entrytest
